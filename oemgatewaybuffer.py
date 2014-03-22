@@ -157,4 +157,61 @@ class OemGatewayEmoncmsBuffer(OemGatewayBuffer):
                 return True
             else:
                 self._log.warning("Send failure")
+
+"""class OemGatewayEmoncmsBufferNode
+
+Stores server parameters and buffers the data between two HTTP requests
+
+"""
+class OemGatewayEmoncmsBufferNode(OemGatewayBuffer):
+
+    def _send_data(self, data, time):
+        """Send data to server."""
         
+        # Prepare data string with the values in data buffer
+        data_string = ''
+        # Timestamp
+        # data_string += '&time=' + str(time)
+        # Node ID
+        data_string += '&nodeid=' + str(data[0])
+        # Data
+        data_string += '&data='
+        for i, val in enumerate(data[1:]):
+            data_string += str(val)
+            data_string += ','
+        # Remove trailing comma and close braces
+        data_string = data_string[0:-1]
+        self._log.debug("Data string: " + data_string)
+        
+        # Prepare URL string of the form
+        # 'http://domain.tld/emoncms/input/post.json?apikey=12345
+        # &node=10&json={1:1806, 2:1664}'
+        url_string = self._settings['protocol'] + self._settings['domain'] + \
+                     self._settings['path'] + '/node/set.json?apikey=' + \
+                     self._settings['apikey'] + data_string
+        self._log.debug("URL string: " + url_string)
+
+        # Send data to server
+        self._log.info("Sending to " + 
+                          self._settings['domain'] + self._settings['path'])
+        try:
+            result = urllib2.urlopen(url_string, timeout=60)
+        except urllib2.HTTPError as e:
+            self._log.warning("Couldn't send to server, HTTPError: " + 
+                                 str(e.code))
+        except urllib2.URLError as e:
+            self._log.warning("Couldn't send to server, URLError: " + 
+                                 str(e.reason))
+        except httplib.HTTPException:
+            self._log.warning("Couldn't send to server, HTTPException")
+        except Exception:
+            import traceback
+            self._log.warning("Couldn't send to server, Exception: " + 
+                                 traceback.format_exc())
+        else:
+            if (result.readline() == 'true'):
+                self._log.debug("Send ok")
+                return True
+            else:
+                self._log.warning("Send failure")
+                

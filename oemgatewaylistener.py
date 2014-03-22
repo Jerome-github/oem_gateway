@@ -325,6 +325,140 @@ class OemGatewayRFM2PiListener(OemGatewaySerialListener):
         self._log.debug("Broadcasting time: %d:%d" % (now.hour, now.minute))
 
         self._ser.write("00,%02d,%02d,00,s" % (now.hour, now.minute))
+        
+class OemGatewayRFM2PiListenerNode(OemGatewaySerialListener):
+
+    def __init__(self, com_port):
+        """Initialize listener
+
+        com_port (string): path to COM port
+
+        """
+        
+        # Initialization
+        super(OemGatewayRFM2PiListenerNode, self).__init__(com_port)
+
+        # Initialize settings
+        self._settings = {'baseid': '', 'frequency': '', 'sgroup': '', 
+            'sendtimeinterval': ''}
+        
+        # Initialize time updata timestamp
+        self._time_update_timestamp = 0
+
+    def _process_frame(self, f):
+        """Process a frame of data
+
+        f (string): 'NodeID val1_lsb val1_msb val2_lsb val2_msb ...'
+
+        This function recombines the integers and checks their validity.
+        
+        Return data as a list: [NodeID, val1, val2]
+
+        """
+        
+        # Log data
+        self._log.info("Serial RX: " + f)
+        
+        # Get an array out of the space separated string
+        received = f.strip().split(' ')
+        
+        # If information message, discard
+        if ((received[0] == '>') or (received[0] == '->')):
+            return
+
+        # Else, discard if frame not of the form 
+        # [node val1_lsb val1_msb val2_lsb val2_msb ...]
+        # with number of elements odd and at least 3
+        # elif ((not (len(received) & 1)) or (len(received) < 3)):
+        #    self._log.warning("Misformed RX frame: " + str(received))
+        
+        # Else, process frame
+        else:
+            try:
+                # Only integers are expected
+                received = [int(val) for val in received]
+            except Exception:
+                self._log.warning("Misformed RX frame: " + str(received))
+            else:
+                # Get node ID
+                node = received[0]
+                
+                # Recombine transmitted chars into signed int
+                values = []
+                for i in range(1, len(received),1):
+                    value = received[i]
+                    values.append(value)
+                
+                self._log.debug("Node: " + str(node))
+                self._log.debug("Values: " + str(values))
+    
+                # Insert node ID before data
+                values.insert(0, node)
+
+                return values
+
+    def set(self, **kwargs):
+        """Send configuration parameters to the RFM2Pi through COM port.
+
+        **kwargs (dict): settings to be modified. Available settings are
+        'baseid', 'frequency', 'sgroup'. Example: 
+        {'baseid': '15', 'frequency': '4', 'sgroup': '210'}
+        
+        """
+        
+        for key, value in kwargs.iteritems():
+            # If radio setting modified, transmit on serial link
+            if key in ['baseid', 'frequency', 'sgroup']:
+                if value != self._settings[key]:
+                    self._settings[key] = value
+                    self._log.info("Setting RFM2Pi | %s: %s" % (key, value))
+                    string = value
+                    if key == 'baseid':
+                        string += 'i'
+                    elif key == 'frequency':
+                        string += 'b'
+                    elif key == 'sgroup':
+                        string += 'g'
+                    self._ser.write(string)
+                    # Wait a sec between two settings
+                    time.sleep(1)
+            elif key == 'sendtimeinterval':
+                if value != self._settings[key]:
+                    self._log.info("Setting send time interval to %s", value)
+                    self._settings[key] = value
+
+    def run(self):
+        """Actions that need to be done on a regular basis. 
+        
+        This should be called in main loop by instantiater.
+        
+        """
+
+        now = time.time()
+
+        # Broadcast time to synchronize emonGLCD
+        interval = int(self._settings['sendtimeinterval'])
+        if (interval): # A value of 0 means don't do anything
+            if (now - self._time_update_timestamp > interval):
+                self._send_time()
+                self._time_update_timestamp = now
+    
+    def _send_time(self):
+        """Send time over radio link to synchronize emonGLCD.
+
+        The radio module can be used to broadcast time, which is useful
+        to synchronize emonGLCD in particular.
+        Beware, this is know to garble the serial link on RFM2Piv1
+        sendtimeinterval defines the interval in seconds between two time
+        broadcasts. 0 means never.
+
+        """
+
+        now = datetime.datetime.now()
+
+        self._log.debug("Broadcasting time: %d:%d" % (now.hour, now.minute))
+
+        self._ser.write("00,%02d,%02d,00,s" % (now.hour, now.minute))
 
 """class OemGatewaySocketListener
 
