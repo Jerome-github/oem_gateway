@@ -56,4 +56,4 @@ loglevel = DEBUG
         apikey = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
         protocol = http://
         active = True
-        path = /
+        path = 
