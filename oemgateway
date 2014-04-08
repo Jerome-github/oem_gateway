@@ -30,6 +30,8 @@ Communicates with the user through an OemGatewayInterface
 """
 class OemGateway(object):
     
+    __version__ = 'v1.0.2'
+    
     def __init__(self, interface):
         """Setup an OpenEnergyMonitor gateway.
         
@@ -47,6 +49,7 @@ class OemGateway(object):
         # Initialize logging
         self._log = logging.getLogger("OemGateway")
         self._set_logging_level(settings['gateway']['loglevel'])
+        self._log.info("OemGateway %s" % self.__version__)
         self._log.info("Opening gateway...")
         
         # Initialize buffers and listeners
@@ -189,7 +192,16 @@ if __name__ == "__main__":
     # Show settings
     parser.add_argument('--show-settings', action='store_true',
         help='show settings and exit (for debugging purposes)')
+    # Show version
+    parser.add_argument('--version', action='store_true',
+        help='display version number and exit')
+    # Parse arguments
     args = parser.parse_args()
+    
+    # Display version number and exit
+    if args.version:
+        print('OemGateway %s' % OemGateway.__version__)
+        sys.exit()
     
     # Logging configuration
     logger = logging.getLogger("OemGateway")
