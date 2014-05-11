@@ -103,7 +103,7 @@ class OemGatewayListener(object):
         self._log.debug('Opening serial port: %s', com_port)
         
         try:
-            s = serial.Serial(com_port, 9600, timeout = 0)
+            s = serial.Serial(com_port, 9600, timeout = None)
         except serial.SerialException as e:
             self._log.error(e)
             raise OemGatewayListenerInitError('Could not open COM port %s' %
