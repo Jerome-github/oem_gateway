@@ -97,9 +97,10 @@ class OemGatewayBuffer(object):
                 del self._data_buffer[0]
         # If buffer size reaches maximum, trash oldest values
         # TODO: optionnal write to file instead of losing data
+        maxsize = self._settings['buffer_size']
         size = len(self._data_buffer)
-        if size > 1000:
-            self._data_buffer = self._data_buffer[size - 1000:]
+        if size > maxsize:
+            self._data_buffer = self._data_buffer[size - maxsize:]
 
 """class OemGatewayEmoncmsBuffer
 
