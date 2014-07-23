@@ -158,4 +158,5 @@ class OemGatewayEmoncmsBuffer(OemGatewayBuffer):
                 return True
             else:
                 self._log.warning("Send failure")
+                return False
 
