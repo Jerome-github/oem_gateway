@@ -72,5 +72,6 @@ loglevel = DEBUG
         apikey = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
         protocol = http://
         active = True
+	buffer_size = 1000
         path = /emoncms
 
