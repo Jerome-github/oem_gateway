@@ -188,6 +188,8 @@ Buffers derive the OemGatewayBuffer class.
     OemGatewayBuffer
       |
       |-- OemGatewayEmoncmsBuffer
+      |
+      |-- OemGatewayThingSpeakBuffer
 
 #### OemGatewayEmoncmsBuffer
 
@@ -204,5 +206,23 @@ None
 * domain (e.g. emoncms.org)
 * path (e.g. /emoncms)
 * apikey
+* active: if False, neither record nor send data, but hold unsent data.
+
+#### OemGatewayThingSpeakBuffer
+
+Send data to an emoncms server. If connection is lost, the data is buffered
+until the network is up again.
+
+##### Init settings
+
+None
+
+##### Runtime settings
+
+* protocol: https://
+* domain: api.thingspeak.com
+* path: /
+* apikey (thingspeak Write Channel key)
+* node (filter specific node to this channel key)
 * active: if False, neither record nor send data, but hold unsent data.
 
