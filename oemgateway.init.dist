@@ -23,10 +23,10 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="OpenEnergyMonitor Gateway"
 NAME=oemgateway
 # Enter your installation path here
-DAEMON=/enter/your/installation/path/here/$NAME
+DAEMON=/home/pi/oem_gateway/$NAME
 # Specify command line arguments here
 DAEMON_ARGS="--logfile /var/log/oemgateway/oemgateway.log"
-#DAEMON_ARGS="--logfile /var/log/oemgateway/oemgateway.log --config-file /path/to/config/file"
+#DAEMON_ARGS="--logfile /var/log/oemgateway/oemgateway.log --config-file /home/pi/oem_gateway/oemgateway.conf"
 DAEMONUSER="pi"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
